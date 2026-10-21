@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카지노 정통 블랙잭</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .casino-felt {
+            background: radial-gradient(circle at center, #14532d 0%, #064e3b 60%, #022c22 100%);
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .card {
+            width: 58px;
+            height: 84px;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 0 2px rgba(255,255,255,0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        }
+
+        @media (min-width: 640px) {
+            .card {
+                width: 72px;
+                height: 104px;
+                border-radius: 8px;
+            }
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            border: 2px solid #3b82f6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border: 1px dashed rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        .chip-btn {
+            box-shadow: 0 4px 0 #78350f, 0 6px 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .chip-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #78350f, 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(217, 119, 6, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full max-w-5xl flex justify-between items-center bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-700/60 shadow-lg mb-3">
+        <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl">🎰</span>
+            <h1 class="text-base sm:text-xl font-black text-amber-400 tracking-wide">BLACKJACK</h1>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <button id="top-ui-toggle-btn" onclick="toggleUiMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl border border-slate-600 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <span id="ui-mode-text">모바일 UI</span>
+            </button>
+
+            <button onclick="confirmGoHome()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5">
+                <i class="fa-solid fa-house"></i>
+                <span>홈으로</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Configuration & Game Setup Screen -->
+    <main id="setup-screen" class="w-full max-w-2xl bg-slate-900/95 border border-amber-500/30 rounded-3xl p-5 sm:p-8 shadow-2xl my-auto text-center">
+        <div class="mb-6">
+            <h2 class="text-2xl sm:text-3xl font-black text-amber-400 mb-1">게임 설정</h2>
+            <p class="text-xs sm:text-sm text-slate-400">원하시는 규칙과 레이아웃을 선택한 후 게임을 시작하세요</p>
+        </div>
+
+        <div class="mb-6 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50">
+            <label class="block text-amber-300 font-bold text-sm sm:text-base mb-2.5">
+                <i class="fa-solid fa-display mr-1"></i> 1. 화면 레이아웃 선택
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="setup-ui-pc" onclick="setUiMode('pc')" class="py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-desktop text-base"></i> PC 모드
+                </button>
+                <button type="button" id="setup-ui-mobile" onclick="setUiMode('mobile')" class="py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-mobile-button text-base"></i> 모바일 모드
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-6 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50">
+            <label class="block text-amber-300 font-bold text-sm sm:text-base mb-2.5">
+                <i class="fa-solid fa-coins mr-1"></i> 2. 게임 방식 선택
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="setup-rule-bet" onclick="setGameRuleMode('bet')" class="py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-sack-dollar text-base"></i> 코인 베팅 모드
+                </button>
+                <button type="button" id="setup-rule-free" onclick="setGameRuleMode('free')" class="py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-base"></i> 자유 연습 모드
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50 mb-6">
+            <label class="block text-amber-300 font-bold text-sm sm:text-base mb-2.5">
+                <i class="fa-solid fa-users mr-1"></i> 3. 플레이어 인원 선택
+            </label>
+            <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                <button onclick="setPlayerCount(1)" id="pcount-1" class="pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-amber-500 bg-amber-500/20 text-amber-300">1인</button>
+                <button onclick="setPlayerCount(2)" id="pcount-2" class="pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-slate-700 bg-slate-800 text-slate-400">2인</button>
+                <button onclick="setPlayerCount(3)" id="pcount-3" class="pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-slate-700 bg-slate-800 text-slate-400">3인</button>
+                <button onclick="setPlayerCount(4)" id="pcount-4" class="pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-slate-700 bg-slate-800 text-slate-400">4인</button>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg py-3.5 rounded-2xl shadow-xl transition transform active:scale-95">
+            게임 시작하기 🚀
+        </button>
+    </main>
+
+    <!-- Main Casino Game Felt Table -->
+    <main id="game-board" class="hidden w-full max-w-5xl casino-felt rounded-3xl p-3 sm:p-6 border-4 border-amber-900/60 my-auto flex flex-col justify-between gap-4 min-h-[75vh]">
+        
+        <!-- Dealer Zone -->
+        <section class="bg-black/30 backdrop-blur-sm border border-amber-500/20 rounded-2xl p-3 text-center flex flex-col items-center">
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-xs bg-red-900/80 text-red-200 font-extrabold px-2.5 py-0.5 rounded-full border border-red-500/40">DEALER</span>
+                <span id="dealer-score" class="text-xs font-bold text-amber-300">점수: ?</span>
+            </div>
+            <div id="dealer-cards" class="flex justify-center items-center gap-2 min-h-[88px] sm:min-h-[108px]"></div>
+        </section>
+
+        <!-- Dynamic Message Banner -->
+        <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl py-2 px-4 text-center">
+            <div id="message-box" class="text-xs sm:text-sm font-bold text-amber-300">게임이 곧 시작됩니다...</div>
+        </div>
+
+        <!-- Players Area -->
+        <section id="players-container" class="w-full my-auto"></section>
+
+        <!-- Action Control Bar -->
+        <section class="bg-slate-950/80 border border-slate-700/80 rounded-2xl p-3 text-center">
+            
+            <!-- Betting Panel -->
+            <div id="betting-panel" class="hidden flex flex-col items-center gap-2">
+                <div id="betting-info-text" class="text-xs sm:text-sm font-extrabold text-amber-300">
+                    [플레이어 1] 베팅 금액을 선택해 주세요
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 my-1">
+                    <button onclick="addBet(1)" class="chip-btn bg-amber-600 hover:bg-amber-500 text-amber-950 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-full border border-amber-300">+1🪙</button>
+                    <button onclick="addBet(5)" class="chip-btn bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-full border border-blue-300">+5🪙</button>
+                    <button onclick="addBet(10)" class="chip-btn bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-full border border-red-300">+10🪙</button>
+                    <button onclick="setAllIn()" class="chip-btn bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-purple-300">🔥 올인 (ALL-IN)</button>
+                    <button onclick="resetCurrentBet()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-slate-500">초기화 (0)</button>
+                </div>
+                <button id="confirm-bet-btn" onclick="confirmBet()" disabled class="w-full sm:w-auto min-w-[200px] bg-slate-700 opacity-50 text-slate-400 font-black text-sm py-2 px-6 rounded-xl transition cursor-not-allowed">
+                    0🪙 베팅 확정 (최소 1🪙)
+                </button>
+            </div>
+
+            <!-- In-Game Action Buttons -->
+            <div id="action-panel" class="hidden flex flex-wrap justify-center gap-2">
+                <button onclick="playerHit()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition">
+                    <i class="fa-solid fa-plus mr-1"></i> 히트 (Hit)
+                </button>
+                <button onclick="playerStand()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition">
+                    <i class="fa-solid fa-hand mr-1"></i> 스탠드 (Stand)
+                </button>
+                <button id="btn-double" onclick="playerDouble()" class="bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition">
+                    <i class="fa-solid fa-angles-up mr-1"></i> 더블다운
+                </button>
+                <button id="btn-split" onclick="playerSplit()" class="bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition">
+                    <i class="fa-solid fa-arrows-split-up-and-left mr-1"></i> 스플릿
+                </button>
+                <button id="btn-insurance" onclick="playerInsurance()" class="hidden bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> 인슈어런스
+                </button>
+            </div>
+
+            <!-- Ace Choice Controls -->
+            <div id="ace-panel" class="hidden flex flex-col items-center gap-2">
+                <div class="text-xs sm:text-sm font-bold text-amber-300">A(에이스) 카드의 점수를 선택하세요:</div>
+                <div class="flex gap-3">
+                    <button onclick="chooseAceValue(1)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm px-5 py-1.5 rounded-xl">1점 선택</button>
+                    <button onclick="chooseAceValue(11)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm px-5 py-1.5 rounded-xl">11점 선택</button>
+                </div>
+            </div>
+
+            <!-- Round Continuation Button Container -->
+            <div id="next-round-container" class="hidden flex justify-center gap-3">
+                <button id="next-round-btn" onclick="startNewRound()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm px-6 py-2.5 rounded-xl shadow-lg transition">
+                    다음 라운드 진행 ➡️
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Multiplayer Bankrupt Action Decision Modal -->
+    <div id="bankrupt-choice-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/40 w-full max-w-md rounded-3xl p-6 text-center shadow-2xl">
+            <div class="text-4xl mb-2">💸</div>
+            <h3 class="text-xl sm:text-2xl font-black text-amber-400 mb-2">파산 플레이어 발생</h3>
+            <p id="bankrupt-choice-msg" class="text-xs sm:text-sm text-slate-300 mb-5 leading-relaxed">
+                코인이 0이 된 플레이어가 존재합니다.<br>어떻게 진행하시겠습니까?
+            </p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="continueWithoutBankrupt()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <span>➡️ 0코인 플레이어 제외하고 계속하기</span>
+                </button>
+                <button onclick="showRankingsModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <span>🏆 최종 순위 보기 & 게임 종료</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Game Over & Leaderboard Modal -->
+    <div id="gameover-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/40 w-full max-w-md rounded-3xl p-6 text-center shadow-2xl">
+            <div class="text-4xl mb-2">🏆</div>
+            <h3 class="text-xl sm:text-2xl font-black text-amber-400 mb-2">게임 최종 순위</h3>
+            <div id="gameover-rankings" class="text-xs sm:text-sm text-slate-300 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-700 text-left space-y-1.5"></div>
+            
+            <div class="flex flex-col sm:flex-row gap-2.5 mt-4">
+                <button onclick="resetGameWithDefaultCoins()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-sm transition shadow-lg">
+                    🔄 게임 리셋 (초기 코인으로 재시작)
+                </button>
+                <button onclick="goHome()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 font-extrabold py-2.5 rounded-xl text-sm transition">
+                    🏠 메인 홈으로
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Script Logic -->
+    <script>
+        let deck = [];
+        let numPlayers = 1;
+        let players = [];
+        let dealerHand = [];
+        let currentTurnPlayerIndex = 0;
+        let currentHandIndex = 0;
+        let isGameOver = false;
+
+        let gameUiMode = 'pc';
+        let gameRuleMode = 'bet';
+        let tempCurrentBet = 0;
+
+        function setUiMode(mode) {
+            gameUiMode = mode;
+            const pcBtn = document.getElementById('setup-ui-pc');
+            const mobileBtn = document.getElementById('setup-ui-mobile');
+            const modeText = document.getElementById('ui-mode-text');
+
+            if (mode === 'pc') {
+                pcBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2";
+                mobileBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2";
+                if (modeText) modeText.innerText = "모바일 UI";
+            } else {
+                mobileBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2";
+                pcBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2";
+                if (modeText) modeText.innerText = "PC UI";
+            }
+            if (!document.getElementById('game-board').classList.contains('hidden')) {
+                renderBoard();
+            }
+        }
+
+        function toggleUiMode() {
+            setUiMode(gameUiMode === 'pc' ? 'mobile' : 'pc');
+        }
+
+        function setGameRuleMode(rule) {
+            gameRuleMode = rule;
+            const betBtn = document.getElementById('setup-rule-bet');
+            const freeBtn = document.getElementById('setup-rule-free');
+
+            if (rule === 'bet') {
+                betBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2";
+                freeBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2";
+            } else {
+                freeBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-amber-500 bg-amber-500/20 text-amber-300 transition flex justify-center items-center gap-2";
+                betBtn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs sm:text-sm border-2 border-slate-700 bg-slate-800 text-slate-400 transition flex justify-center items-center gap-2";
+            }
+        }
+
+        function setPlayerCount(count) {
+            numPlayers = count;
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`pcount-${i}`);
+                if (i === count) {
+                    btn.className = "pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-amber-500 bg-amber-500/20 text-amber-300";
+                } else {
+                    btn.className = "pcount-btn py-2.5 rounded-xl font-extrabold text-sm sm:text-base border-2 border-slate-700 bg-slate-800 text-slate-400";
+                }
+            }
+        }
+
+        function createDeck() {
+            const suits = ['♠', '♣', '♥', '◆'];
+            const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            deck = [];
+
+            for (let s of suits) {
+                for (let r of ranks) {
+                    deck.push({ suit: s, rank: r });
+                }
+            }
+
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            for (let b = 0; b < 4; b++) deck.pop();
+        }
+
+        function calculateScore(hand) {
+            let score = 0;
+            let aceCount = 0;
+
+            hand.forEach(card => {
+                if (['J', 'Q', 'K'].includes(card.rank)) {
+                    score += 10;
+                } else if (card.rank === 'A') {
+                    if (card.assignedAceValue !== undefined) {
+                        score += card.assignedAceValue;
+                    } else {
+                        score += 11;
+                        aceCount++;
+                    }
+                } else {
+                    score += parseInt(card.rank);
+                }
+            });
+
+            while (score > 21 && aceCount > 0) {
+                score -= 10;
+                aceCount--;
+            }
+            return score;
+        }
+
+        function startGame() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-board').classList.remove('hidden');
+            document.getElementById('top-ui-toggle-btn').classList.remove('hidden');
+
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                players.push({
+                    name: `플레이어 ${i + 1}`,
+                    coins: 20,
+                    bets: [0],
+                    hands: [[]],
+                    isDoubled: [false],
+                    status: ['playing'],
+                    insurance: 0,
+                    hasPaidBlackjack: false
+                });
+            }
+
+            startNewRound();
+        }
+
+        function confirmGoHome() {
+            if (confirm("정말 메인 화면으로 나가시겠습니까? 진행 중인 기록은 모두 초기화됩니다.")) {
+                goHome();
+            }
+        }
+
+        function goHome() {
+            players = [];
+            dealerHand = [];
+            document.getElementById('game-board').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('top-ui-toggle-btn').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
+            document.getElementById('bankrupt-choice-modal').classList.add('hidden');
+        }
+
+        function resetGameWithDefaultCoins() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            document.getElementById('bankrupt-choice-modal').classList.add('hidden');
+            
+            // Clean reset back to initial state (20 coins for selected player count)
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                players.push({
+                    name: `플레이어 ${i + 1}`,
+                    coins: 20,
+                    bets: [0],
+                    hands: [[]],
+                    isDoubled: [false],
+                    status: ['playing'],
+                    insurance: 0,
+                    hasPaidBlackjack: false
+                });
+            }
+
+            startNewRound();
+        }
+
+        function startNewRound() {
+            createDeck();
+            dealerHand = [deck.pop(), deck.pop()];
+
+            players.forEach(p => {
+                p.hands = [[]];
+                p.bets = [0];
+                p.isDoubled = [false];
+                p.status = ['playing'];
+                p.insurance = 0;
+                p.hasPaidBlackjack = false;
+            });
+
+            currentTurnPlayerIndex = 0;
+            currentHandIndex = 0;
+            isGameOver = false;
+
+            document.getElementById('next-round-container').classList.add('hidden');
+
+            if (gameRuleMode === 'bet') {
+                promptNextPlayerBet();
+            } else {
+                dealInitialCards();
+            }
+        }
+
+        function promptNextPlayerBet() {
+            if (currentTurnPlayerIndex >= players.length) {
+                currentTurnPlayerIndex = 0;
+                dealInitialCards();
+                return;
+            }
+
+            const p = players[currentTurnPlayerIndex];
+            
+            if (p.coins <= 0) {
+                currentTurnPlayerIndex++;
+                promptNextPlayerBet();
+                return;
+            }
+
+            tempCurrentBet = 0;
+            updateBettingPanelUI();
+
+            document.getElementById('action-panel').classList.add('hidden');
+            document.getElementById('ace-panel').classList.add('hidden');
+            document.getElementById('betting-panel').classList.remove('hidden');
+            renderBoard();
+        }
+
+        function addBet(amount) {
+            const p = players[currentTurnPlayerIndex];
+            if (tempCurrentBet + amount <= p.coins) {
+                tempCurrentBet += amount;
+                updateBettingPanelUI();
+            }
+        }
+
+        function setAllIn() {
+            const p = players[currentTurnPlayerIndex];
+            tempCurrentBet = p.coins;
+            updateBettingPanelUI();
+        }
+
+        function resetCurrentBet() {
+            tempCurrentBet = 0;
+            updateBettingPanelUI();
+        }
+
+        function updateBettingPanelUI() {
+            const p = players[currentTurnPlayerIndex];
+            document.getElementById('betting-info-text').innerText = `[${p.name}] 보유: ${p.coins}🪙 | 현재 배팅: ${tempCurrentBet}🪙`;
+
+            const confirmBtn = document.getElementById('confirm-bet-btn');
+            if (tempCurrentBet > 0) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerText = `${tempCurrentBet}🪙 배팅 확정`;
+                confirmBtn.className = "w-full sm:w-auto min-w-[200px] bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm py-2 px-6 rounded-xl shadow-lg transition cursor-pointer";
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.innerText = `0🪙 배팅 확정 (최소 1🪙)`;
+                confirmBtn.className = "w-full sm:w-auto min-w-[200px] bg-slate-700 opacity-50 text-slate-400 font-black text-sm py-2 px-6 rounded-xl transition cursor-not-allowed";
+            }
+        }
+
+        function confirmBet() {
+            if (tempCurrentBet <= 0) return;
+
+            const p = players[currentTurnPlayerIndex];
+            p.bets[0] = tempCurrentBet;
+            p.coins -= tempCurrentBet;
+
+            currentTurnPlayerIndex++;
+            promptNextPlayerBet();
+        }
+
+        function dealInitialCards() {
+            document.getElementById('betting-panel').classList.add('hidden');
+            document.getElementById('message-box').innerText = "카드를 분배하는 중입니다...";
+
+            players.forEach(p => {
+                p.hands[0] = [deck.pop(), deck.pop()];
+            });
+
+            currentTurnPlayerIndex = 0;
+            currentHandIndex = 0;
+
+            renderBoard();
+            processTurnStep();
+        }
+
+        function renderBoard(hideDealerCard = true) {
+            const dealerCardsEl = document.getElementById('dealer-cards');
+            dealerCardsEl.innerHTML = '';
+            dealerHand.forEach((card, idx) => {
+                if (idx === 0 && hideDealerCard) {
+                    dealerCardsEl.innerHTML += `<div class="card card-back flex items-center justify-center text-amber-400/50 font-black text-lg">?</div>`;
+                } else {
+                    dealerCardsEl.innerHTML += createCardHtml(card);
+                }
+            });
+
+            document.getElementById('dealer-score').innerText = hideDealerCard ? "점수: ?" : `점수: ${calculateScore(dealerHand)}`;
+
+            const container = document.getElementById('players-container');
+            container.innerHTML = '';
+
+            if (gameUiMode === 'mobile') {
+                container.className = "w-full flex flex-col gap-2.5 my-auto max-h-[50vh] overflow-y-auto pr-1";
+            } else {
+                container.className = `w-full grid gap-3 my-auto ${players.length === 1 ? 'grid-cols-1' : players.length === 2 ? 'grid-cols-2' : players.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`;
+            }
+
+            players.forEach((p, pIdx) => {
+                const isActiveTurn = (!isGameOver && pIdx === currentTurnPlayerIndex);
+                let playerCardClass = `bg-slate-900/80 border rounded-2xl p-3 transition flex ${gameUiMode === 'mobile' ? 'flex-row items-center justify-between' : 'flex-col items-center'} ${isActiveTurn ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-xl bg-slate-900/95' : 'border-slate-700/60'}`;
+
+                let handsContainerHtml = '';
+
+                p.hands.forEach((hand, hIdx) => {
+                    const score = calculateScore(hand);
+                    let cardsHtml = hand.map(c => createCardHtml(c)).join('');
+                    let subLabel = p.hands.length > 1 ? `<span class="text-xs text-amber-400 font-bold">패${hIdx + 1}</span> ` : '';
+
+                    let betBadge = gameRuleMode === 'bet' ? `<span class="bg-amber-500/20 text-amber-300 text-[11px] font-extrabold px-2 py-0.5 rounded-full border border-amber-500/30">🪙 ${p.bets[hIdx]}</span>` : '';
+
+                    handsContainerHtml += `
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-1.5">
+                                ${subLabel}
+                                ${betBadge}
+                                <span class="text-xs font-bold text-slate-300">합계: ${score}</span>
+                            </div>
+                            <div class="flex justify-center items-center gap-1 flex-wrap">${cardsHtml}</div>
+                        </div>
+                    `;
+                });
+
+                const coinDisplay = gameRuleMode === 'bet' ? `<div class="text-xs font-black text-amber-300 mt-1"><i class="fa-solid fa-coins mr-1"></i>${p.coins}🪙</div>` : '';
+
+                if (gameUiMode === 'mobile') {
+                    container.innerHTML += `
+                        <div class="${playerCardClass}">
+                            <div class="text-left min-w-[90px]">
+                                <div class="font-black text-sm text-slate-100">${p.name}</div>
+                                ${coinDisplay}
+                            </div>
+                            <div class="flex gap-3 items-center justify-end flex-grow">${handsContainerHtml}</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <div class="${playerCardClass}">
+                            <div class="font-black text-sm text-slate-100 mb-1">${p.name}</div>
+                            <div class="flex flex-col gap-2 w-full">${handsContainerHtml}</div>
+                            ${coinDisplay}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function createCardHtml(card) {
+            const isRed = ['♥', '◆'].includes(card.suit);
+            const colorClass = isRed ? 'text-red-600' : 'text-slate-900';
+            return `
+                <div class="card bg-white ${colorClass} p-1 sm:p-1.5 flex flex-col justify-between font-extrabold">
+                    <div class="text-xs sm:text-sm leading-none">${card.rank}</div>
+                    <div class="text-lg sm:text-2xl text-center leading-none">${card.suit}</div>
+                    <div class="text-xs sm:text-sm text-right leading-none">${card.rank}</div>
+                </div>
+            `;
+        }
+
+        function processTurnStep() {
+            if (currentTurnPlayerIndex >= players.length) {
+                startDealerTurn();
+                return;
+            }
+
+            const p = players[currentTurnPlayerIndex];
+
+            if (p.coins <= 0 && gameRuleMode === 'bet' && p.bets[0] === 0) {
+                currentTurnPlayerIndex++;
+                processTurnStep();
+                return;
+            }
+
+            const currentHand = p.hands[currentHandIndex];
+
+            if (currentHand.length === 2 && calculateScore(currentHand) === 21 && !p.isSplitAceHand?.[currentHandIndex]) {
+                p.status[currentHandIndex] = 'blackjack';
+                
+                if (gameRuleMode === 'bet' && !p.hasPaidBlackjack) {
+                    p.hasPaidBlackjack = true;
+                    const bet = p.bets[currentHandIndex];
+                    const winCoins = Math.floor(bet * 2.5);
+                    p.coins += winCoins;
+                }
+
+                renderBoard();
+                document.getElementById('action-panel').classList.add('hidden');
+                document.getElementById('ace-panel').classList.add('hidden');
+                document.getElementById('message-box').innerText = `✨ [${p.name}] 내 카드 2개로 블랙잭 달성! 즉시 코인이 지급되었습니다.`;
+                setTimeout(nextHandOrPlayer, 1200);
+                return;
+            }
+
+            if (p.isSplitAceHand?.[currentHandIndex]) {
+                renderBoard();
+                document.getElementById('action-panel').classList.add('hidden');
+                document.getElementById('ace-panel').classList.add('hidden');
+                document.getElementById('message-box').innerText = `♠️ [${p.name}] A 스플릿 패는 11점으로 고정되며 1장만 받고 턴이 자동 종료됩니다.`;
+                setTimeout(nextHandOrPlayer, 1000);
+                return;
+            }
+
+            const unassignedAce = currentHand.find(c => c.rank === 'A' && c.assignedAceValue === undefined);
+            if (unassignedAce) {
+                renderBoard();
+                document.getElementById('action-panel').classList.add('hidden');
+                document.getElementById('ace-panel').classList.remove('hidden');
+                document.getElementById('message-box').innerText = `[${p.name}] 에이스(A) 카드가 뽑혔습니다! 점수를 선택해주세요.`;
+                return;
+            }
+
+            const score = calculateScore(currentHand);
+
+            if (score > 21) {
+                p.status[currentHandIndex] = 'bust';
+                renderBoard();
+                document.getElementById('message-box').innerText = `💥 [${p.name}] 버스트 (21 초과)!`;
+                setTimeout(nextHandOrPlayer, 800);
+                return;
+            }
+
+            if (p.isDoubled[currentHandIndex]) {
+                renderBoard();
+                document.getElementById('message-box').innerText = `[${p.name}] 더블다운 완료 (${score}점)`;
+                setTimeout(nextHandOrPlayer, 800);
+                return;
+            }
+
+            renderBoard();
+            document.getElementById('ace-panel').classList.add('hidden');
+            document.getElementById('action-panel').classList.remove('hidden');
+            document.getElementById('message-box').innerText = `[${p.name}] 차례입니다. 행동을 선택하세요.`;
+
+            const canDouble = currentHand.length === 2 && (gameRuleMode === 'free' || p.coins >= p.bets[currentHandIndex]);
+            document.getElementById('btn-double').style.display = canDouble ? 'inline-block' : 'none';
+
+            // J, Q, K, 10 카드를 포함하여 카드 가치(Value)가 동일한 경우 스플릿 가능하도록 처리
+            const canSplit = currentHand.length === 2 && (getCardVal(currentHand[0]) === getCardVal(currentHand[1])) && (gameRuleMode === 'free' || p.coins >= p.bets[currentHandIndex]);
+            document.getElementById('btn-split').style.display = canSplit ? 'inline-block' : 'none';
+
+            const dealerAce = dealerHand[1] && dealerHand[1].rank === 'A';
+            const canInsure = dealerAce && currentHand.length === 2 && p.insurance === 0 && (gameRuleMode === 'free' || p.coins >= Math.floor(p.bets[0] / 2));
+            document.getElementById('btn-insurance').style.display = canInsure ? 'inline-block' : 'none';
+        }
+
+        function getCardVal(card) {
+            if (['J', 'Q', 'K'].includes(card.rank)) return 10;
+            if (card.rank === 'A') return 11;
+            return parseInt(card.rank);
+        }
+
+        function chooseAceValue(val) {
+            const p = players[currentTurnPlayerIndex];
+            const currentHand = p.hands[currentHandIndex];
+            const unassignedAce = currentHand.find(c => c.rank === 'A' && c.assignedAceValue === undefined);
+            if (unassignedAce) {
+                unassignedAce.assignedAceValue = val;
+            }
+            document.getElementById('ace-panel').classList.add('hidden');
+            processTurnStep();
+        }
+
+        function playerHit() {
+            const p = players[currentTurnPlayerIndex];
+            p.hands[currentHandIndex].push(deck.pop());
+            processTurnStep();
+        }
+
+        function playerStand() {
+            nextHandOrPlayer();
+        }
+
+        function playerDouble() {
+            const p = players[currentTurnPlayerIndex];
+            if (gameRuleMode === 'bet') {
+                p.coins -= p.bets[currentHandIndex];
+                p.bets[currentHandIndex] *= 2;
+            }
+            p.isDoubled[currentHandIndex] = true;
+            p.hands[currentHandIndex].push(deck.pop());
+            processTurnStep();
+        }
+
+        function playerSplit() {
+            const p = players[currentTurnPlayerIndex];
+            const hand = p.hands[currentHandIndex];
+            const card1 = hand[0];
+            const card2 = hand[1];
+
+            const isAceSplit = (card1.rank === 'A' && card2.rank === 'A');
+
+            if (isAceSplit) {
+                card1.assignedAceValue = 11;
+                card2.assignedAceValue = 11;
+            }
+
+            const newCard1 = deck.pop();
+            const newCard2 = deck.pop();
+
+            p.hands[currentHandIndex] = [card1, newCard1];
+            p.hands.splice(currentHandIndex + 1, 0, [card2, newCard2]);
+
+            if (!p.isSplitAceHand) p.isSplitAceHand = [];
+            if (isAceSplit) {
+                p.isSplitAceHand[currentHandIndex] = true;
+                p.isSplitAceHand.splice(currentHandIndex + 1, 0, true);
+            } else {
+                p.isSplitAceHand[currentHandIndex] = false;
+                p.isSplitAceHand.splice(currentHandIndex + 1, 0, false);
+            }
+
+            const betAmt = p.bets[currentHandIndex];
+            if (gameRuleMode === 'bet') {
+                p.coins -= betAmt;
+            }
+            p.bets.splice(currentHandIndex + 1, 0, betAmt);
+            p.isDoubled.splice(currentHandIndex + 1, 0, false);
+            p.status.splice(currentHandIndex + 1, 0, 'playing');
+
+            processTurnStep();
+        }
+
+        function playerInsurance() {
+            const p = players[currentTurnPlayerIndex];
+            const insAmt = Math.floor(p.bets[0] / 2);
+            if (gameRuleMode === 'bet') {
+                p.coins -= insAmt;
+            }
+            p.insurance = insAmt;
+            document.getElementById('btn-insurance').classList.add('hidden');
+            document.getElementById('message-box').innerText = `[${p.name}] 인슈어런스 보증 가입 완료!`;
+        }
+
+        function nextHandOrPlayer() {
+            const p = players[currentTurnPlayerIndex];
+            currentHandIndex++;
+            if (currentHandIndex >= p.hands.length) {
+                currentTurnPlayerIndex++;
+                currentHandIndex = 0;
+            }
+            processTurnStep();
+        }
+
+        function startDealerTurn() {
+            document.getElementById('action-panel').classList.add('hidden');
+            document.getElementById('message-box').innerText = "딜러가 숨겨진 카드를 공개합니다...";
+
+            setTimeout(() => {
+                renderBoard(false);
+                
+                let dealerLoop = setInterval(() => {
+                    let dealerScore = calculateScore(dealerHand);
+                    if (dealerScore <= 16) {
+                        document.getElementById('message-box').innerText = "딜러가 16 이하이므로 카드를 더 받습니다...";
+                        setTimeout(() => {
+                            dealerHand.push(deck.pop());
+                            renderBoard(false);
+                        }, 500);
+                    } else {
+                        clearInterval(dealerLoop);
+                        setTimeout(determineWinnersAndPayouts, 500);
+                    }
+                }, 800);
+            }, 500);
+        }
+
+        function determineWinnersAndPayouts() {
+            isGameOver = true;
+            renderBoard(false);
+            const dealerScore = calculateScore(dealerHand);
+            const dealerBust = dealerScore > 21;
+            const dealerBlackjack = dealerHand.length === 2 && dealerScore === 21;
+
+            let summaryHtml = "<div class='space-y-1'>";
+
+            players.forEach((p) => {
+                let playerSummary = `<div><strong>[${p.name}]</strong> `;
+
+                p.hands.forEach((hand, hIdx) => {
+                    const score = calculateScore(hand);
+                    const bet = p.bets[hIdx];
+                    const subLabel = p.hands.length > 1 ? `패${hIdx + 1}: ` : '';
+
+                    if (dealerBlackjack && p.insurance) {
+                        if (gameRuleMode === 'bet') {
+                            p.coins += p.insurance * 3;
+                            playerSummary += `<span class="text-blue-400">[Insurance 성공 +${p.insurance * 2}🪙]</span> `;
+                        } else {
+                            playerSummary += `<span class="text-blue-400">[Insurance 성공]</span> `;
+                        }
+                    }
+
+                    if (gameRuleMode === 'free') {
+                        if (p.status[hIdx] === 'bust' || score > 21) {
+                            playerSummary += `${subLabel}<span class="text-red-400">버스트 패배 ❌</span> `;
+                        } else if (p.status[hIdx] === 'blackjack') {
+                            playerSummary += `${subLabel}<span class="text-amber-300 font-extrabold">블랙잭 승리! ✨</span> `;
+                        } else if (dealerBust || score > dealerScore) {
+                            playerSummary += `${subLabel}<span class="text-emerald-400">승리! 🎉</span> `;
+                        } else if (score < dealerScore) {
+                            playerSummary += `${subLabel}<span class="text-red-400">패배 ❌</span> `;
+                        } else {
+                            playerSummary += `${subLabel}<span class="text-gray-300">무승부 🤝</span> `;
+                        }
+                    } else {
+                        if (p.status[hIdx] === 'blackjack') {
+                            playerSummary += `${subLabel}<span class="text-amber-300 font-extrabold">블랙잭 승리! (즉시 지급 완료 ✨)</span> `;
+                        } else if (p.status[hIdx] === 'bust' || score > 21) {
+                            playerSummary += `${subLabel}<span class="text-red-400">버스트 패배 (-${bet}🪙)</span> `;
+                        } else if (dealerBust) {
+                            p.coins += bet * 2;
+                            playerSummary += `${subLabel}<span class="text-emerald-400">딜러 버스트 승리! (+${bet}🪙)</span> `;
+                        } else if (score > dealerScore) {
+                            p.coins += bet * 2;
+                            playerSummary += `${subLabel}<span class="text-emerald-400">승리! (+${bet}🪙)</span> `;
+                        } else if (score < dealerScore) {
+                            playerSummary += `${subLabel}<span class="text-red-400">패배 (-${bet}🪙)</span> `;
+                        } else {
+                            p.coins += bet;
+                            playerSummary += `${subLabel}<span class="text-gray-300">무승부 (보존)</span> `;
+                        }
+                    }
+                });
+
+                if (gameRuleMode === 'bet') {
+                    playerSummary += ` ➡️ 최종 코인: <span class="text-amber-300 font-bold">${p.coins}🪙</span></div>`;
+                } else {
+                    playerSummary += `</div>`;
+                }
+                summaryHtml += playerSummary;
+            });
+
+            let bankruptPlayers = players.filter(p => p.coins <= 0);
+
+            if (gameRuleMode === 'bet') {
+                const rankedPlayers = [...players].sort((a, b) => b.coins - a.coins);
+                summaryHtml += `<div class="mt-3 pt-2 border-t border-amber-500/30 text-amber-300 font-extrabold text-sm sm:text-base">🏆 현재 라운드 최종 순위 발표 🏆</div><div class="flex flex-wrap justify-center gap-3 text-xs sm:text-sm mt-1">`;
+                rankedPlayers.forEach((p, rank) => {
+                    let medal = rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "4️⃣";
+                    summaryHtml += `<span class="bg-slate-900/80 px-2.5 py-1 rounded-md border border-amber-500/30">${medal} ${p.name}: ${p.coins}🪙</span>`;
+                });
+                summaryHtml += `</div>`;
+            }
+
+            summaryHtml += "</div>";
+
+            document.getElementById('message-box').innerHTML = summaryHtml;
+
+            if (gameRuleMode === 'bet' && bankruptPlayers.length > 0) {
+                document.getElementById('next-round-container').classList.add('hidden');
+
+                setTimeout(() => {
+                    const names = bankruptPlayers.map(p => p.name).join(', ');
+
+                    // 2인 이상 플레이 중 파산 발생 시 핸들링 logic
+                    if (numPlayers === 2 || players.length <= 2) {
+                        // 2인 게임 혹은 남은 플레이어가 2명 이하인 경우 "계속하기" 제외하고 바로 최종 순위/종료
+                        showRankingsModal();
+                    } else if (players.length > 2) {
+                        // 3인 이상 플레이 시에만 파산자 제외하고 계속하기 옵션 제공
+                        const activeCount = players.length - bankruptPlayers.length;
+                        document.getElementById('bankrupt-choice-msg').innerHTML = `
+                            [<strong class="text-amber-300">${names}</strong>] 님의 코인이 0이 되었습니다.<br>
+                            ${activeCount > 0 ? `(남은 플레이어: ${activeCount}명)` : '모든 플레이어가 파산했습니다.'}<br><br>
+                            어떻게 진행하시겠습니까?
+                        `;
+                        document.getElementById('bankrupt-choice-modal').classList.remove('hidden');
+                    } else {
+                        showRankingsModal();
+                    }
+                }, 1800);
+            } else {
+                document.getElementById('next-round-container').classList.remove('hidden');
+            }
+        }
+
+        function continueWithoutBankrupt() {
+            players = players.filter(p => p.coins > 0);
+            document.getElementById('bankrupt-choice-modal').classList.add('hidden');
+
+            if (players.length === 0) {
+                showRankingsModal();
+            } else {
+                startNewRound();
+            }
+        }
+
+        function showRankingsModal() {
+            document.getElementById('bankrupt-choice-modal').classList.add('hidden');
+            const rankedPlayers = [...players].sort((a, b) => b.coins - a.coins);
+            
+            let rankingsHtml = '';
+            rankedPlayers.forEach((p, rank) => {
+                let medal = rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : "4️⃣";
+                rankingsHtml += `
+                    <div class="flex justify-between items-center py-1 border-b border-slate-800 last:border-0">
+                        <span class="font-bold text-slate-200">${medal} ${p.name}</span>
+                        <span class="font-black text-amber-400">${p.coins}🪙</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('gameover-rankings').innerHTML = rankingsHtml;
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
